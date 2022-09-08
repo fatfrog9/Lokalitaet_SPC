@@ -20,7 +20,7 @@ if __name__ == '__main__':
     # meta parameters
     dimension = 3
     resolution = 32 # in bites
-    x = 50
+    x = 51
     y = 23
     z = 235
 
