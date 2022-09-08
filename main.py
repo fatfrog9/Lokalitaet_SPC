@@ -26,7 +26,6 @@ def mortonFromArray(resolution, np_array):
 
 
 
-
 def generateArray(resolution):
     max_value = (2 ** resolution) - 1  # maximum value depending on resolution
 
@@ -48,22 +47,33 @@ def generateArray(resolution):
 
     return np_array
 
+def plotZline(morton_codes, m):
+    # werte nach latentspace sortieren
+    morton_codes.sort()
+
+    sorted_array = []
+    for code in morton_codes:
+        x, y = m.unpack(code)
+        sorted_array.append((x, y))
+
+    zip(*sorted_array)
+    plt.plot(*zip(*sorted_array), 'o-')
+    plt.show()
+
+
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
-    resolution = 2  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)
+    resolution = 4  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)
     # np_array = np.array([[15, 15], [3, 4]])
 
     np_array = generateArray(resolution)
-    print(np_array)
+    #print(np_array)
 
     morton_codes, m = mortonFromArray(resolution, np_array)
 
-    for code in morton_codes:
-        print(m.unpack(code))
-
-    # mortonFromArray(resolution, np_array)
-
+    plotZline(morton_codes, m)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
