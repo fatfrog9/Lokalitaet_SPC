@@ -9,6 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import morton
 
+dim3 = True
 
 def mortonFromArray(resolution, np_array):
 
@@ -20,7 +21,10 @@ def mortonFromArray(resolution, np_array):
     m = morton.Morton(dimensions=dimension, bits=resolution)
 
     for i in range(0, value_cnt):
-        morton_codes.append(m.pack(np_array[i, 0], np_array[i, 1]))  # hier ggf. noch die Dimension anpassen
+        if(dim3 == False):
+            morton_codes.append(m.pack(np_array[i, 0], np_array[i, 1]))
+        else:
+            morton_codes.append(m.pack(np_array[i, 0], np_array[i, 1], np_array[i, 2]))
 
     return morton_codes, m
 
@@ -29,21 +33,35 @@ def mortonFromArray(resolution, np_array):
 def generateArray(resolution):
     max_value = (2 ** resolution) - 1  # maximum value depending on resolution
 
-    np_array = np.zeros((max_value ** 2, 2), dtype=int)
+    dim = 2 if dim3 == False else 3
+
+    np_array = (np.zeros((max_value ** dim, dim), dtype=int))
 
     # set inital values to populate array
-    cnt_left = 0
-    cnt_right = 0
+    cnt_one = 0
+    cnt_two = 0
+    if dim3 == True: cnt_three = 0
 
-    for i in range(0, max_value ** 2):
+    for i in range(0, max_value ** dim):
         # write values to array
-        np_array[i][0] = cnt_left
-        np_array[i][1] = cnt_right
+        np_array[i][0] = cnt_one
+        np_array[i][1] = cnt_two
+        if dim3 == True: np_array[i][2] = cnt_three
         # reset values
-        cnt_right += 1
-        if (cnt_right >= max_value):
-            cnt_left += 1
-            cnt_right = 0
+        if(dim3 == False):
+            cnt_two += 1
+            if (cnt_two >= max_value):
+                cnt_one += 1
+                cnt_two = 0
+        else:
+            cnt_three += 1
+            if(cnt_three >= max_value):
+                cnt_two += 1
+                cnt_three = 0
+                if(cnt_two >= max_value):
+                    cnt_one += 1
+                    cnt_two = 0
+                    cnt_three = 0
 
     return np_array
 
@@ -53,11 +71,21 @@ def plotZline(morton_codes, m):
 
     sorted_array = []
     for code in morton_codes:
-        x, y = m.unpack(code)
-        sorted_array.append((x, y))
+        if(dim3 == False):
+            x, y = m.unpack(code)
+            sorted_array.append((x, y))
+        else:
+            x, y, z = m.unpack(code)
+            sorted_array.append((x, y, z))
 
     zip(*sorted_array)
-    plt.plot(*zip(*sorted_array), 'o-')
+
+    if dim3 == True:
+        ax = plt.axes(projection='3d')
+        ax.plot3D(*zip(*sorted_array), 'o-')
+    else:
+        plt.plot(*zip(*sorted_array), 'o-')
+
     plt.show()
 
 
@@ -66,11 +94,9 @@ def plotZline(morton_codes, m):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
-    resolution = 4  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)
-    # np_array = np.array([[15, 15], [3, 4]])
+    resolution = 2  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)
 
     np_array = generateArray(resolution)
-    #print(np_array)
 
     morton_codes, m = mortonFromArray(resolution, np_array)
 
