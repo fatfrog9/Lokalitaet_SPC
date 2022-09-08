@@ -9,18 +9,9 @@ import matplotlib.pyplot as plt
 import morton
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Strg+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-
-    resolution = 4  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)
+def mortonFromArray(resolution, np_array):
 
     # meta parameters
-    np_array = np.array([[15, 15], [3, 4]])
     morton_codes = []
 
     value_cnt, dimension = np_array.shape
@@ -28,11 +19,20 @@ if __name__ == '__main__':
     m = morton.Morton(dimensions=dimension, bits=resolution)
 
     for i in range(0, value_cnt):
-        morton_codes.append(m.pack(np_array[i, 0], np_array[i, 1])) #hier ggf. noch die Dimension anpassen
+        morton_codes.append(m.pack(np_array[i, 0], np_array[i, 1]))  # hier ggf. noch die Dimension anpassen
 
     for code in morton_codes:
         print(code)
         print(m.unpack(code))
+
+
+# Press the green button in the gutter to run the script.
+if __name__ == '__main__':
+
+    resolution = 4  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)
+    np_array = np.array([[15, 15], [3, 4]])
+    
+    mortonFromArray(resolution, np_array)
 
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
