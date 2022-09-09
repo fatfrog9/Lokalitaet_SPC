@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import morton
+from tqdm import tqdm
 
 dim3 = False
 
@@ -22,7 +23,8 @@ def mortonFromArray(resolution, np_array):
 
     m = morton.Morton(dimensions=dimension, bits=resolution)
 
-    for i in range(0, value_cnt):
+    print("Calculate Morton-Codes: (Dimension=", dimension, "; Resolution=", resolution, "Bits)" )
+    for i in tqdm(range(0, value_cnt)):
         if(dim3 == False):
             morton_codes.append(m.pack(np_array[i, 0], np_array[i, 1]))
         else:
@@ -45,7 +47,8 @@ def generateArray(resolution):
     cnt_two = 0
     if dim3 == True: cnt_three = 0
 
-    for i in range(0, max_value**dim):
+    print("Generate datapoint array (", max_value**dim, ";", dim, ").")
+    for i in tqdm(range(0, max_value**dim)):
         # write values to array
         np_array[i][0] = cnt_one
         np_array[i][1] = cnt_two
@@ -164,21 +167,41 @@ def getMaxSpredInMorton (np_array, distance_circle):
 
     return maxDistance, point_max_distance_from, point_max_distance_to
 
+def calcMaximumDistanceBetweenPoints(np_array_morton):
+    df = pd.DataFrame(np_array_morton, columns=['x', 'y', 'morton'])
+    df = df.sort_values(by='morton', ascending=True)
+    df = df.reset_index()
 
+    print("Determine maximum Distance.")
+
+    df_length = len(df)
+    for i in tqdm(range(0, df_length)):
+        if i == 0:
+            df['dist_to_prev'] = 0
+        else:
+            df.at[i, 'dist_to_prev'] = math.dist([df['x'][i], df['y'][i]], [df['x'][i - 1], df['y'][i - 1]])
+
+    idx_max_distance = df['dist_to_prev'].idxmax()
+    max_dist_A = (df['x'][idx_max_distance - 1], df['y'][idx_max_distance - 1]) if idx_max_distance > 0 else (0, 0)
+    max_dist_B = (df['x'][idx_max_distance], df['y'][idx_max_distance])
+
+    print("Maximum euclidean distance of ", df['dist_to_prev'][idx_max_distance], " between A=", max_dist_A, " and B=",
+          max_dist_B)
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
-    resolution = 2  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)
+    resolution = 8  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)
 
+    print("Determine maximum distance of datapoint with a resolution of", resolution, "Bits.")
     np_array = generateArray(resolution)
     morton_codes, m = mortonFromArray(resolution, np_array)
     np_array_morton = np.column_stack((np_array, morton_codes))
 
-    print(np_array_morton)
+    calcMaximumDistanceBetweenPoints(np_array_morton)
 
-    plotScatterAnnotationLatentSpace(np_array_morton, morton_codes, m)
+    # plotScatterAnnotationLatentSpace(np_array_morton, morton_codes, m)
 
 
 
