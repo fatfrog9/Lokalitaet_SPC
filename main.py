@@ -243,7 +243,6 @@ def calculateSampleRate(np_array_morton, rangeThreshold):
         if curMaxMortonDist > maxMortonDist:
             maxMortonDist = curMaxMortonDist
             refMaxPoint = (df['x'][j], df['y'][j])
-            print("in", j, "ref", refPoint)
 
             if mortonMax > mortonMin:
                 distMaxPoint = (distInRange_df['x'][distInRange_df['morton'].astype(float).idxmax()],
@@ -282,9 +281,6 @@ if __name__ == '__main__':
     # calcMaximumDistanceBetweenPoints(np_array_morton)
 
     # plotScatterAnnotationLatentSpace(np_array_morton, morton_codes, m)
-
-
-
     # plt.show()
 
 
