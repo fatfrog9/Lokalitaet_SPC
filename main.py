@@ -86,26 +86,10 @@ def plotZline(morton_codes, m):
 
     if dim3 == True:
         ax = plt.axes(projection='3d')
-        ax.plot3D(*zip(*array_unpack))
+        ax.plot3D(*zip(*array_unpack), 'o-')
     else:
-        plt.plot(*zip(*array_unpack))
+        plt.plot(*zip(*array_unpack), 'o-')
 
-<<<<<<< Updated upstream
-=======
-
-
-def plotScatterAndLines(np_array, morton_codes, m):
-    morton_code_array = np.array(morton_codes)
-    np_array = np.column_stack((np_array, morton_codes))
-
-    plt.plot(np_array[:, 0], np_array[:, 1], "-o")
-
-    for i, point in enumerate(np_array):
-        plt.scatter(point[0], point[1], marker='o')
-        plt.annotate(point[2], (np_array[i, 0] + 0.02, np_array[i, 1] + 0.02))
-
-    plotZline(morton_codes, m)
->>>>>>> Stashed changes
     plt.show()
 
 
@@ -126,16 +110,6 @@ if __name__ == '__main__':
     np_array = generateArray(resolution)
 
     morton_codes, m = mortonFromArray(resolution, np_array)
-<<<<<<< Updated upstream
-=======
-
-    plotScatterAndLines(np_array, morton_codes, m)
-
-
-
-
-    #print(morton_codes)
->>>>>>> Stashed changes
 
     plotLatentSpace(morton_codes)
 
