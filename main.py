@@ -9,6 +9,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import morton
 from tqdm import tqdm
+import sys
+from decimal import *
+
 
 dim3 = False
 
@@ -23,7 +26,7 @@ def mortonFromArray(resolution, np_array):
 
     m = morton.Morton(dimensions=dimension, bits=resolution)
 
-    print("Calculate Morton-Codes: (Dimension=", dimension, "; Resolution=", resolution, "Bits)" )
+    print("Calculate Morton-Codes." )
     for i in tqdm(range(0, value_cnt)):
         if(dim3 == False):
             morton_codes.append(m.pack(np_array[i, 0], np_array[i, 1]))
@@ -172,7 +175,8 @@ def calcMaximumDistanceBetweenPoints(np_array_morton):
     df = df.sort_values(by='morton', ascending=True)
     df = df.reset_index()
 
-    print("Determine maximum Distance.")
+    sys.stdout.write("")
+    print("Determine maximum distance.")
 
     df_length = len(df)
     for i in tqdm(range(0, df_length)):
@@ -189,17 +193,87 @@ def calcMaximumDistanceBetweenPoints(np_array_morton):
           max_dist_B)
 
 
+def calculateSampleRate(np_array_morton, rangeThreshold):
+    df = pd.DataFrame(np_array_morton, columns=['x', 'y', 'morton'])
+    # df = df.sort_values(by='morton', ascending=True)
+
+    #Dataframe erweitern und die Distanzen zu jeweiligen Punkten berechnen
+    # for j in tqdm(range(0,len(df))): #,len(df)
+    #     refPoint = (df['x'][j], df['y'][j])
+    #     df.insert(loc=j + 3, column="dist_to_point_" + str(j), value = 0)
+    #
+    #     for i in range(0, len(df)):
+    #         curPoint = (df['x'][i], df['y'][i])
+    #         df.at[i, 'dist_to_point_'+str(j)] = math.dist(curPoint, refPoint)
+
+    print("Determine Sample Rate.")
+    maxMortonDist = 0
+    maxDistPoint_max = (0,0)
+    maxDistPoint_min = (0,0)
+
+    for j in tqdm(range(0, len(df))):
+        distInRange_df = pd.DataFrame(columns=['x', 'y', 'morton', 'dist'])
+        refPoint = (df['x'][j], df['y'][j])
+
+        for i in range(0, len(df)):
+            curPoint = (df['x'][i], df['y'][i])
+            dist = math.dist(curPoint, refPoint)
+
+            dist_temp = int(dist*100)
+            rangeThreshold_temp = int(rangeThreshold*100)
+
+            if dist_temp < rangeThreshold_temp:
+                temp_df = pd.DataFrame([{'x' : df['x'][i] , 'y' : df['y'][i], 'morton' : df['morton'][i], 'dist' : dist}])
+                distInRange_df = pd.concat([distInRange_df, temp_df], axis=0, ignore_index=True)
+
+        #print(distInRange_df)
+        #print("max:", distInRange_df['morton'].max(), "min:", distInRange_df['morton'].min())
+
+        mortonRefPoint = df['morton'][j]
+        mortonMin = distInRange_df['morton'].min()
+        mortonMax = distInRange_df['morton'].max()
+
+        mortonMin = mortonRefPoint - mortonMin if mortonMin < mortonRefPoint else mortonMin - mortonRefPoint
+        mortonMax = mortonMax - mortonRefPoint if mortonMax > mortonRefPoint else mortonRefPoint - mortonMax
+
+        curMaxMortonDist = mortonMax if mortonMax > mortonMin else mortonMin
+
+        # print("current Distance:",curMaxMortonDist)
+
+        if curMaxMortonDist > maxMortonDist:
+            maxMortonDist = curMaxMortonDist
+            maxDistPoint_max = (distInRange_df['x'][distInRange_df['morton'].astype(float).idxmax()],
+                              distInRange_df['y'][distInRange_df['morton'].astype(float).idxmax()])
+            maxDistPoint_min = (distInRange_df['x'][distInRange_df['morton'].astype(float).idxmin()],
+                              distInRange_df['y'][distInRange_df['morton'].astype(float).idxmin()])
+
+        # print("Point: ", curPoint, "Dist: ", curDist)
+        #print("MaxMortonDist_current:", curMaxMortonDist)
+    print("The maximum Morton Distance of", maxMortonDist, "is between P_max=", maxDistPoint_max, "and P_min=", maxDistPoint_min)
+    return maxMortonDist, maxDistPoint_max, maxDistPoint_min
+
+
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
-    resolution = 8  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)
+    print("Hello...")
 
-    print("Determine maximum distance of datapoint with a resolution of", resolution, "Bits.")
+    resolution = 8  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
+    rangeThreshold = 1
+
+    print("Let's determine the (half) Sample Rate in latent space;"
+          "maximum distance between points that have an euclidean distance of max: ", rangeThreshold)
+    print("The resolution is set to", resolution, "Bits.")
+
     np_array = generateArray(resolution)
     morton_codes, m = mortonFromArray(resolution, np_array)
     np_array_morton = np.column_stack((np_array, morton_codes))
 
-    calcMaximumDistanceBetweenPoints(np_array_morton)
+    calculateSampleRate(np_array_morton, 1.1)
+
+    # print("Determine maximum distance of datapoint with a resolution of", resolution, "Bits.")
+    # calcMaximumDistanceBetweenPoints(np_array_morton)
 
     # plotScatterAnnotationLatentSpace(np_array_morton, morton_codes, m)
 
