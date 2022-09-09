@@ -11,6 +11,8 @@ import morton
 
 dim3 = True
 
+
+
 def mortonFromArray(resolution, np_array):
 
     # meta parameters
@@ -65,26 +67,28 @@ def generateArray(resolution):
 
     return np_array
 
+
+
 def plotZline(morton_codes, m):
     # werte nach latentspace sortieren
     morton_codes.sort()
 
-    sorted_array = []
+    array_unpack = []
     for code in morton_codes:
         if(dim3 == False):
             x, y = m.unpack(code)
-            sorted_array.append((x, y))
+            array_unpack.append((x, y))
         else:
             x, y, z = m.unpack(code)
-            sorted_array.append((x, y, z))
+            array_unpack.append((x, y, z))
 
-    zip(*sorted_array)
+    zip(*array_unpack)
 
     if dim3 == True:
         ax = plt.axes(projection='3d')
-        ax.plot3D(*zip(*sorted_array), 'o-')
+        ax.plot3D(*zip(*array_unpack), 'o-')
     else:
-        plt.plot(*zip(*sorted_array), 'o-')
+        plt.plot(*zip(*array_unpack), 'o-')
 
     plt.show()
 
