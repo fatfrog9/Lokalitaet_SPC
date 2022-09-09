@@ -9,7 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import morton
 
-dim3 = True
+dim3 = False
 
 
 
@@ -93,16 +93,25 @@ def plotZline(morton_codes, m):
     plt.show()
 
 
+def plotLatentSpace(morten_codes):
+    print(morton_codes)
+
+    plt.plot(morton_codes)
+    plt.show()
+
+
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
-    resolution = 2  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)
+    resolution = 4  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)
 
     np_array = generateArray(resolution)
 
     morton_codes, m = mortonFromArray(resolution, np_array)
+
+    plotLatentSpace(morton_codes)
 
     plotZline(morton_codes, m)
 
