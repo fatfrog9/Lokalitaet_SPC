@@ -93,8 +93,18 @@ def plotZline(morton_codes, m):
     else:
         plt.plot(*zip(*array_unpack), 'o-')
 
-    print(morton_codes)
-    plt.show()
+
+
+def plotScatterAnnotationLatentSpace(np_array_morton, morton_codes, m):
+
+    plt.plot(np_array_morton[:, 0], np_array_morton[:, 1], "-o")
+
+    for i, point in enumerate(np_array_morton):
+        plt.scatter(point[0], point[1], marker='o')
+        plt.annotate(point[2], (np_array_morton[i, 0] + 0.02, np_array_morton[i, 1] + 0.02))
+
+    plotZline(morton_codes, m)
+
 
 
 def calcDistanceToNeighbors (np_array, position, distance_circle):
@@ -160,24 +170,19 @@ def getMaxSpredInMorton (np_array, distance_circle):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
-    resolution = 4  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)
+    resolution = 2  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)
 
     np_array = generateArray(resolution)
-    print(np_array)
-    # Plot Verlauf des Arrays
     morton_codes, m = mortonFromArray(resolution, np_array)
+    np_array_morton = np.column_stack((np_array, morton_codes))
 
-    morton_code_array = np.array(morton_codes)
-    np_array = np.column_stack((np_array, morton_codes))
+    print(np_array_morton)
 
-    print(np_array)
+    plotScatterAnnotationLatentSpace(np_array_morton, morton_codes, m)
 
-    plt.plot(np_array[:, 0], np_array[:, 1], "-o")
 
-    for i, point in enumerate(np_array):
-        plt.scatter(point[0], point[1], marker='o')
-        plt.annotate(point[2], (np_array[i, 0]+0.02, np_array[i, 1]+0.02))
-    plt.show()
+
+    # plt.show()
 
 
 
