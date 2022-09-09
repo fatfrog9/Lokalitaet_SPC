@@ -208,8 +208,8 @@ def calculateSampleRate(np_array_morton, rangeThreshold):
 
     print("Determine Sample Rate.")
     maxMortonDist = 0
-    maxDistPoint_max = (0,0)
-    maxDistPoint_min = (0,0)
+    refMaxPoint = (0,0)
+    distMaxPoint = (0,0)
 
     for j in tqdm(range(0, len(df))):
         distInRange_df = pd.DataFrame(columns=['x', 'y', 'morton', 'dist'])
@@ -242,15 +242,21 @@ def calculateSampleRate(np_array_morton, rangeThreshold):
 
         if curMaxMortonDist > maxMortonDist:
             maxMortonDist = curMaxMortonDist
-            maxDistPoint_max = (distInRange_df['x'][distInRange_df['morton'].astype(float).idxmax()],
-                              distInRange_df['y'][distInRange_df['morton'].astype(float).idxmax()])
-            maxDistPoint_min = (distInRange_df['x'][distInRange_df['morton'].astype(float).idxmin()],
-                              distInRange_df['y'][distInRange_df['morton'].astype(float).idxmin()])
+            refMaxPoint = (df['x'][j], df['y'][j])
+            print("in", j, "ref", refPoint)
+
+            if mortonMax > mortonMin:
+                distMaxPoint = (distInRange_df['x'][distInRange_df['morton'].astype(float).idxmax()],
+                        distInRange_df['y'][distInRange_df['morton'].astype(float).idxmax()])
+            else:
+                distMaxPoint = (distInRange_df['x'][distInRange_df['morton'].astype(float).idxmin()],
+                        distInRange_df['y'][distInRange_df['morton'].astype(float).idxmin()])
+
 
         # print("Point: ", curPoint, "Dist: ", curDist)
         #print("MaxMortonDist_current:", curMaxMortonDist)
-    print("The maximum Morton Distance of", maxMortonDist, "is between P_max=", maxDistPoint_max, "and P_min=", maxDistPoint_min)
-    return maxMortonDist, maxDistPoint_max, maxDistPoint_min
+    print("The maximum Morton Distance of", maxMortonDist, "is between P_ref", refMaxPoint, "and P_min=", distMaxPoint)
+    return maxMortonDist, refMaxPoint, distMaxPoint
 
 
 
@@ -259,7 +265,7 @@ if __name__ == '__main__':
 
     print("Hello...")
 
-    resolution = 8  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
+    resolution = 2  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
     rangeThreshold = 1
 
     print("Let's determine the (half) Sample Rate in latent space;"
