@@ -145,7 +145,7 @@ if __name__ == '__main__':
     # print("Determine maximum distance of datapoint with a resolution of", resolution, "Bits.")
     # calcMaximumDistanceBetweenPoints(np_array_morton)
 
-    plotScatterAnnotationLatentSpace_df(df_array, m)
+    # plotScatterAnnotationLatentSpace_df(df_array, m)
 
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
