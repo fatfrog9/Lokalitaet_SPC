@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import morton
 from tqdm import tqdm
 import sys
+from scipy.spatial import distance
 from decimal import *
 
 
@@ -60,7 +61,7 @@ def calcMaximumDistanceBetweenPoints(np_array_morton):
         if i == 0:
             df['dist_to_prev'] = 0
         else:
-            df.at[i, 'dist_to_prev'] = math.dist([df['x'][i], df['y'][i]], [df['x'][i - 1], df['y'][i - 1]])
+            df.at[i, 'dist_to_prev'] = distance.euclidean([df['x'][i], df['y'][i]], [df['x'][i - 1], df['y'][i - 1]])
 
     idx_max_distance = df['dist_to_prev'].idxmax()
     max_dist_A = (df['x'][idx_max_distance - 1], df['y'][idx_max_distance - 1]) if idx_max_distance > 0 else (0, 0)
@@ -83,7 +84,7 @@ def calculateSampleRate(df_array, rangeThreshold):
 
         for i in range(0, len(df_array)):
             curPoint = (df_array['x'][i], df_array['y'][i])
-            dist = math.dist(curPoint, refPoint)
+            dist = distance.euclidean(curPoint, refPoint) #math.dist
 
             dist_temp = int(dist*100)
             rangeThreshold_temp = int(rangeThreshold*100)
@@ -128,24 +129,40 @@ def calculateSampleRate(df_array, rangeThreshold):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
-    print("Hello...")
+    # if len(sys.argv) != 2:
+    #     print('Invalid Numbers of Arguments. Script will be terminated.')
+    #
+    # else:
+    #     try:
+    #         n = int(sys.argv[1])
+    #     except IndexError:
+    #         print('missing argument')
+    #     except ValueError:
+    #         print('argument must be an integer')
+    #     else:
+    #         if n <= 0:
+    #             print('argument must be non-negative ang greater than 0')
+    #         else:
 
-    resolution = 2  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
-    rangeThreshold = 1.1
+                print("Hello...")
 
-    print("Let's determine the (half) Sample Rate in latent space;"
-          "maximum distance between points that have an euclidean distance of max: ", rangeThreshold)
-    print("The resolution is set to", resolution, "Bits.")
+                #resolution = 2  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
+                rangeThreshold = 1.1
+                resolution = 8
 
-    print("Generate array.")
-    df_array, m = generateArray_df(resolution=resolution, dimension=2)
+                print("Let's determine the (half) Sample Rate in latent space;"
+                      "maximum distance between points that have an euclidean distance of max: ", rangeThreshold)
+                print("The resolution is set to", resolution, "Bits.")
 
-    calculateSampleRate(df_array, rangeThreshold)
+                print("Generate array.")
+                df_array, m = generateArray_df(resolution=resolution, dimension=2)
 
-    # print("Determine maximum distance of datapoint with a resolution of", resolution, "Bits.")
-    # calcMaximumDistanceBetweenPoints(np_array_morton)
+                calculateSampleRate(df_array, rangeThreshold)
 
-    # plotScatterAnnotationLatentSpace_df(df_array, m)
+                # print("Determine maximum distance of datapoint with a resolution of", resolution, "Bits.")
+                # calcMaximumDistanceBetweenPoints(np_array_morton)
+
+                # plotScatterAnnotationLatentSpace_df(df_array, m)
 
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
