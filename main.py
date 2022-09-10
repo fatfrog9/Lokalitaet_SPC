@@ -36,6 +36,20 @@ def mortonFromArray(resolution, np_array):
     return morton_codes, m
 
 
+def generateArray_df(resolution, dimension):
+    max_value = (2 ** resolution)
+    dim = 2 if dim3 == False else 3
+    m = morton.Morton(dimensions=dimension, bits=resolution)
+
+    df_array = pd.DataFrame(columns=['x', 'y', 'morton'])
+
+    for cnt_one in tqdm(range (0, max_value)):
+        for cnt_two in range(0, max_value):
+            temp_df = pd.DataFrame([{'x': cnt_one, 'y': cnt_two, 'morton': m.pack(cnt_one, cnt_two)}])
+            df_array = pd.concat([df_array, temp_df], axis=0, ignore_index=True)
+
+    return df_array, m
+
 
 def generateArray(resolution):
     max_value = (2 ** resolution)  # maximum value depending on resolution
@@ -193,8 +207,8 @@ def calcMaximumDistanceBetweenPoints(np_array_morton):
           max_dist_B)
 
 
-def calculateSampleRate(np_array_morton, rangeThreshold):
-    df = pd.DataFrame(np_array_morton, columns=['x', 'y', 'morton'])
+def calculateSampleRate(df_array, rangeThreshold):
+    # df = pd.DataFrame(np_array_morton, columns=['x', 'y', 'morton'])
     # df = df.sort_values(by='morton', ascending=True)
 
     #Dataframe erweitern und die Distanzen zu jeweiligen Punkten berechnen
@@ -211,25 +225,25 @@ def calculateSampleRate(np_array_morton, rangeThreshold):
     refMaxPoint = (0,0)
     distMaxPoint = (0,0)
 
-    for j in tqdm(range(0, len(df))):
+    for j in tqdm(range(0, len(df_array))):
         distInRange_df = pd.DataFrame(columns=['x', 'y', 'morton', 'dist'])
-        refPoint = (df['x'][j], df['y'][j])
+        refPoint = (df_array['x'][j], df_array['y'][j])
 
-        for i in range(0, len(df)):
-            curPoint = (df['x'][i], df['y'][i])
+        for i in range(0, len(df_array)):
+            curPoint = (df_array['x'][i], df_array['y'][i])
             dist = math.dist(curPoint, refPoint)
 
             dist_temp = int(dist*100)
             rangeThreshold_temp = int(rangeThreshold*100)
 
             if dist_temp < rangeThreshold_temp:
-                temp_df = pd.DataFrame([{'x' : df['x'][i] , 'y' : df['y'][i], 'morton' : df['morton'][i], 'dist' : dist}])
+                temp_df = pd.DataFrame([{'x' : df_array['x'][i] , 'y' : df_array['y'][i], 'morton' : df_array['morton'][i], 'dist' : dist}])
                 distInRange_df = pd.concat([distInRange_df, temp_df], axis=0, ignore_index=True)
 
         #print(distInRange_df)
         #print("max:", distInRange_df['morton'].max(), "min:", distInRange_df['morton'].min())
 
-        mortonRefPoint = df['morton'][j]
+        mortonRefPoint = df_array['morton'][j]
         mortonMin = distInRange_df['morton'].min()
         mortonMax = distInRange_df['morton'].max()
 
@@ -242,7 +256,7 @@ def calculateSampleRate(np_array_morton, rangeThreshold):
 
         if curMaxMortonDist > maxMortonDist:
             maxMortonDist = curMaxMortonDist
-            refMaxPoint = (df['x'][j], df['y'][j])
+            refMaxPoint = (df_array['x'][j], df_array['y'][j])
 
             if mortonMax > mortonMin:
                 distMaxPoint = (distInRange_df['x'][distInRange_df['morton'].astype(float).idxmax()],
@@ -264,18 +278,21 @@ if __name__ == '__main__':
 
     print("Hello...")
 
-    resolution = 2  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
-    rangeThreshold = 1
+    resolution = 8  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
+    rangeThreshold = 1.1
 
     print("Let's determine the (half) Sample Rate in latent space;"
           "maximum distance between points that have an euclidean distance of max: ", rangeThreshold)
     print("The resolution is set to", resolution, "Bits.")
 
-    np_array = generateArray(resolution)
-    morton_codes, m = mortonFromArray(resolution, np_array)
-    np_array_morton = np.column_stack((np_array, morton_codes))
+    print("Generate array.")
+    df_array, m = generateArray_df(resolution=resolution, dimension=2)
 
-    calculateSampleRate(np_array_morton, 1.1)
+    #np_array = generateArray(resolution)
+    #morton_codes, m = mortonFromArray(resolution, np_array)
+    #np_array_morton = np.column_stack((np_array, morton_codes))
+
+    calculateSampleRate(df_array, rangeThreshold)
 
     # print("Determine maximum distance of datapoint with a resolution of", resolution, "Bits.")
     # calcMaximumDistanceBetweenPoints(np_array_morton)
