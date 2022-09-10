@@ -114,6 +114,49 @@ def plotZline(morton_codes, m):
         plt.plot(*zip(*array_unpack), 'o-')
 
 
+def plotScatterAnnotationLatentSpace_df(df_array, m):
+
+    df_array.plot(x = 'x', y = 'y', marker="o")
+    for idx, row in df_array.iterrows():
+        plt.annotate(row['morton'], (row['x']+0.02, row['y']+0.02))
+
+    df_array = df_array.sort_values(by='morton')
+    # print(df_array)
+    df_array.reset_index()
+
+    df_array.plot(x='x', y='y', marker="o")
+    for idx, row in df_array.iterrows():
+        plt.annotate(row['morton'], (row['x'] + 0.02, row['y'] + 0.02))
+    plt.show()
+
+
+    # for i, point in enumerate(np_array_morton):
+    #     plt.scatter(point[0], point[1], marker='o')
+    #     plt.annotate(point[2], (np_array_morton[i, 0] + 0.02, np_array_morton[i, 1] + 0.02))
+    #
+    # plotZline(morton_codes, m)
+    #
+    # morton_codes.sort()
+    #
+    # morton_value = []
+    # array_unpack = []
+    # for code in morton_codes:
+    #     if (dim3 == False):
+    #         morton_value.append(code)
+    #         x, y = m.unpack(code)
+    #         array_unpack.append((x, y))
+    #     else:
+    #         x, y, z = m.unpack(code)
+    #         array_unpack.append((x, y, z))
+    #
+    # zip(*array_unpack)
+    #
+    # if dim3 == True:
+    #     ax = plt.axes(projection='3d')
+    #     ax.plot3D(*zip(*array_unpack), 'o-')
+    # else:
+    #     plt.plot(*zip(*array_unpack), 'o-')
+
 
 def plotScatterAnnotationLatentSpace(np_array_morton, morton_codes, m):
 
@@ -278,7 +321,7 @@ if __name__ == '__main__':
 
     print("Hello...")
 
-    resolution = 8  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
+    resolution = 2  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
     rangeThreshold = 1.1
 
     print("Let's determine the (half) Sample Rate in latent space;"
@@ -297,8 +340,8 @@ if __name__ == '__main__':
     # print("Determine maximum distance of datapoint with a resolution of", resolution, "Bits.")
     # calcMaximumDistanceBetweenPoints(np_array_morton)
 
-    # plotScatterAnnotationLatentSpace(np_array_morton, morton_codes, m)
-    # plt.show()
+    plotScatterAnnotationLatentSpace_df(df_array, m)
+    plt.show()
 
 
 
