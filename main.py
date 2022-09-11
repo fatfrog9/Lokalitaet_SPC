@@ -3,6 +3,7 @@
 # Press Umschalt+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import math
+import multiprocessing
 
 import numpy as np
 import pandas as pd
@@ -11,6 +12,7 @@ import morton
 from tqdm import tqdm
 import sys
 from scipy.spatial import distance
+from multiprocessing import Pool
 from decimal import *
 
 
@@ -132,7 +134,7 @@ def calculateSampleRate(resolution, m):
     max_A = (0, int((max_value / 2) - 0.5))
     max_B = (0, int((max_value / 2) + 0.5))
 
-    sampleRate = (m.pack(max_B) - m.pack(max_A)) # *2 <- für die eigentliche Rate, hier berechnen wir erstmal nur die Distanz
+    sampleRate = (m.pack(0, int((max_value / 2) + 0.5)) - m.pack(0, int((max_value / 2) - 0.5))) # *2 <- für die eigentliche Rate, hier berechnen wir erstmal nur die Distanz
     print("The maximum Morton Distance ist caluclatet as ", sampleRate, " between P_ref", max_A, "and P_min=", max_B)
 
 
@@ -159,6 +161,8 @@ if __name__ == '__main__':
                 #resolution = 2  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
                 rangeThreshold = 1.1
                 resolution = 2
+
+                resolutionList = list(range(2, 10))
 
                 print("Let's determine the (half) Sample Rate in latent space;"
                       "maximum distance between points that have an euclidean distance of max: ", rangeThreshold)
