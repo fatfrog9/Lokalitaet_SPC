@@ -156,16 +156,17 @@ if __name__ == '__main__':
     #             print('argument must be non-negative ang greater than 0')
     #         else:
 
-                print("Hello...")
+            print("Hello...")
 
-                #resolution = 2  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
-                rangeThreshold = 1.1
-                resolution = 2
+            #resolution = 2  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
+            rangeThreshold = 1.1
+            resolution = 2
 
-                resolutionList = list(range(2, 10))
+            print("Let's determine the (half) Sample Rate in latent space;"
+                    "maximum distance between points that have an euclidean distance of max: ", rangeThreshold)
 
-                print("Let's determine the (half) Sample Rate in latent space;"
-                      "maximum distance between points that have an euclidean distance of max: ", rangeThreshold)
+            for resolution in range(2,12):
+
                 print("The resolution is set to", resolution, "Bits.")
 
                 print("Generate array.")
@@ -173,6 +174,8 @@ if __name__ == '__main__':
 
                 determineSampleRateExperimental(df_array, rangeThreshold)
                 calculateSampleRate(resolution, m)
+
+                print()
                 # print("Determine maximum distance of datapoint with a resolution of", resolution, "Bits.")
                 # calcMaximumDistanceBetweenPoints(np_array_morton)
 
