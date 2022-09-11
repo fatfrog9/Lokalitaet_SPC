@@ -71,7 +71,7 @@ def calcMaximumDistanceBetweenPoints(np_array_morton):
           max_dist_B)
 
 
-def calculateSampleRate(df_array, rangeThreshold):
+def determineSampleRateExperimental(df_array, rangeThreshold):
 
     print("Determine Sample Rate.")
     maxMortonDist = 0
@@ -121,9 +121,19 @@ def calculateSampleRate(df_array, rangeThreshold):
 
         # print("Point: ", curPoint, "Dist: ", curDist)
         #print("MaxMortonDist_current:", curMaxMortonDist)
-    print("The maximum Morton Distance of", maxMortonDist, "is between P_ref", refMaxPoint, "and P_min=", distMaxPoint)
+    print("The maximum Morton Distance is experimentally determined as ", maxMortonDist, " between P_ref", refMaxPoint, "and P_min=", distMaxPoint)
     return maxMortonDist, refMaxPoint, distMaxPoint
 
+
+def calculateSampleRate(resolution, m):
+
+    max_value = 2**resolution-1
+
+    max_A = (0, int((max_value / 2) - 0.5))
+    max_B = (0, int((max_value / 2) + 0.5))
+
+    sampleRate = (m.pack(max_B) - m.pack(max_A)) # *2 <- für die eigentliche Rate, hier berechnen wir erstmal nur die Distanz
+    print("The maximum Morton Distance ist caluclatet as ", sampleRate, " between P_ref", max_A, "and P_min=", max_B)
 
 
 # Press the green button in the gutter to run the script.
@@ -148,7 +158,7 @@ if __name__ == '__main__':
 
                 #resolution = 2  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
                 rangeThreshold = 1.1
-                resolution = 8
+                resolution = 2
 
                 print("Let's determine the (half) Sample Rate in latent space;"
                       "maximum distance between points that have an euclidean distance of max: ", rangeThreshold)
@@ -157,8 +167,8 @@ if __name__ == '__main__':
                 print("Generate array.")
                 df_array, m = generateArray_df(resolution=resolution, dimension=2)
 
-                calculateSampleRate(df_array, rangeThreshold)
-
+                determineSampleRateExperimental(df_array, rangeThreshold)
+                calculateSampleRate(resolution, m)
                 # print("Determine maximum distance of datapoint with a resolution of", resolution, "Bits.")
                 # calcMaximumDistanceBetweenPoints(np_array_morton)
 
