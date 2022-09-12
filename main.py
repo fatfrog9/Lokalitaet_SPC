@@ -166,7 +166,7 @@ if __name__ == '__main__':
             print("Let's determine the (half) Sample Rate in latent space;"
                     "maximum distance between points that have an euclidean distance of max: ", rangeThreshold)
 
-            for resolution in range(7,8):
+            for resolution in range(2,3):
 
                 print("The resolution is set to", resolution, "Bits.")
 
