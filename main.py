@@ -159,37 +159,36 @@ if __name__ == '__main__':
 
             print("Hello...")
 
-            #resolution = 2  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
+            resolution = 2  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
             rangeThreshold = 1.1
-            resolution = 2
 
             print("Let's determine the (half) Sample Rate in latent space;"
                     "maximum distance between points that have an euclidean distance of max: ", rangeThreshold)
 
-            for resolution in range(2,3):
+            #for resolution in range(2,3):
 
-                print("The resolution is set to", resolution, "Bits.")
+            print("The resolution is set to", resolution, "Bits.")
 
-                print("Generate array.")
-                df_array, m, hilbert_curve = generateArray_df_morton(resolution=resolution, dimension=2)
+            print("Generate array.")
+            df_array, m, hilbert_curve = generateArray_df_morton(resolution=resolution, dimension=2)
 
-                # print(df_array)
+            # print(df_array)
 
-                #determineSampleRateExperimental(df_array, rangeThreshold, 'morton')
-                determineSampleRateExperimental(df_array, rangeThreshold, 'hilbert')
-                calculateSampleRate(resolution, m)
+            #determineSampleRateExperimental(df_array, rangeThreshold, 'morton')
+            determineSampleRateExperimental(df_array, rangeThreshold, 'hilbert')
+            calculateSampleRate(resolution, m)
 
-                print()
-                # print("Determine maximum distance of datapoint with a resolution of", resolution, "Bits.")
-                # calcMaximumDistanceBetweenPoints(np_array_morton)
+            print()
+            # print("Determine maximum distance of datapoint with a resolution of", resolution, "Bits.")
+            # calcMaximumDistanceBetweenPoints(np_array_morton)
 
-                plotScatterAnnotationLatentSpace_df(df_array, 'morton')
-                plotScatterAnnotationLatentSpace_df(df_array, 'hilbert')
-                # df_array.rename(columns={'x': 'y',
-                #            'y': 'x'}, inplace=True)
-                # plotScatterAnnotationLatentSpace_df(df_array, m)
+            plotScatterAnnotationLatentSpace_df(df_array, 'morton')
+            plotScatterAnnotationLatentSpace_df(df_array, 'hilbert')
+            # df_array.rename(columns={'x': 'y',
+            #            'y': 'x'}, inplace=True)
+            # plotScatterAnnotationLatentSpace_df(df_array, m)
 
-                plt.show()
+            plt.show()
 
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
