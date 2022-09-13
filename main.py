@@ -149,9 +149,113 @@ def search(geofence, df_array, curve, m, ax):
 
     ax.add_patch(Rectangle((A[0]-0.25, A[1]-0.25), C[0]-A[0]+0.5, C[1]-A[1]+0.5, fill=False, color='red', lw = 2))
 
-    df_array[(df_array.morton >= search_space[0]) & (df_array.morton <= search_space[1])].sort_values(by='morton').reset_index().plot(x='x', y='y', marker="o", ax=ax, label="SearchSpace")
+    #df_array[(df_array.morton >= search_space[0]) & (df_array.morton <= search_space[1])].sort_values(by='morton').reset_index().plot(x='x', y='y', marker="o", ax=ax, label="SearchSpace")
 
-    print("Search space for geofence:", geofence, "requires search between", search_space[0], "and", search_space[1], "resulting in", search_space[1]-search_space[0], "queries")
+    search_df = df_array[(df_array.morton >= search_space[0]) & (df_array.morton <= search_space[1])]
+
+    min = 0
+    max = (2**resolution)-1
+    search_df = identifyNonRelvantAreas(m, geofence, search_df, min, min, max, max)
+    search_df.sort_values(by='morton').reset_index().plot(x='x', y='y', marker="o", ax=ax, label="SearchSpace")
+
+    print("Search space for geofence:", geofence, "requires search between", search_space[0], "and", search_space[1], "requires", search_df['morton'].count(), "queries.", )
+
+
+def identifyNonRelvantAreas(m, geofence, search_df, min_value_x, min_value_y, max_value_x, max_value_y):
+
+    if (m.pack(max_value_x, max_value_y) - m.pack(min_value_x, min_value_y)) <=15:
+        return search_df
+
+    A = geofence[0]
+    C = geofence[1]
+
+    half_value_x = int(((max_value_x - min_value_x) / 2) + 0.5 + min_value_x)
+    half_value_y = int(((max_value_y - min_value_y) / 2) + 0.5 + min_value_y)
+
+    # search_df = df_array[['x', 'y', 'morton']]
+
+    Q1 = False
+    Q2 = False
+    Q3 = False
+    Q4 = False
+
+    if (A[0] < half_value_x) & (A[1] < half_value_y) & (C[0] >= half_value_x) & (C[1] >= half_value_y):
+        # alle
+        Q1 = True
+        Q2 = True
+        Q3 = True
+        Q4 = True
+    elif (A[0] < half_value_x) & (A[1] >= half_value_y) & (C[0] >= half_value_x) & (C[1] >= half_value_y):
+        # oben beide
+        Q3 = True
+        Q4 = True
+    elif (A[0] < half_value_x) & (A[1] < half_value_y) & (C[0] >= half_value_x) & (C[1] < half_value_y):
+        # unten beide
+        Q1 = True
+        Q2 = True
+    elif (A[0] < half_value_x) & (A[1] < half_value_y) & (C[0] < half_value_x) & (C[1] >= half_value_y):
+        # links beide
+        Q1 = True
+        Q3 = True
+    elif (A[0] >= half_value_x) & (A[1] < half_value_y) & (C[0] >= half_value_x) & (C[1] >= half_value_y):
+        # rechts beide
+        Q2 = True
+        Q4 = True
+    elif (A[0] < half_value_x) & (A[1] >= half_value_y) & (C[0] < half_value_x) & (C[1] >= half_value_y):
+        # oben links
+        Q3 = True
+    elif (A[0] < half_value_x) & (A[1] < half_value_y) & (C[0] < half_value_x) & (C[1] < half_value_y):
+        # unten links
+        Q1 = True
+    elif (A[0] >= half_value_x) & (A[1] < half_value_y) & (C[0] >= half_value_x) & (C[1] < half_value_y):
+        # unten rechts
+        Q2 = True
+    elif (A[0] >= half_value_x) & (A[1] >= half_value_y) & (C[0] >= half_value_x) & (C[1] >= half_value_y):
+        # oben rechts
+        Q4 = True
+    else:
+        #irgendwas stimmt mit der eingabe nicht
+        sys.exit("Geofence is incorrect; please check!")
+
+    Q1_range = (m.pack(min_value_x, min_value_y), m.pack((half_value_x-1), (half_value_y-1)))
+    Q2_range = (m.pack(half_value_x, min_value_y), m.pack(max_value_x, (half_value_y - 1)))
+    Q3_range = (m.pack(min_value_x, half_value_y), m.pack((half_value_x - 1), max_value_y))
+    Q4_range = (m.pack(half_value_x, half_value_y), m.pack(max_value_x, max_value_y))
+
+    # print("Q1", Q1_range, "Q2", Q2_range, "Q3", Q3_range, "Q4", Q4_range)
+
+    #Q1_range = (0, 63)
+    #Q2_range = (64, 127)
+    #Q3_range = (128, 191)
+    #Q4_range = (192, 255)
+
+    if Q1 == False:
+        for i in range(Q1_range[0], Q1_range[1]+1):
+            search_df = search_df[search_df['morton'] != i]
+    else:
+        search_df = identifyNonRelvantAreas(m, geofence, search_df, min_value_x=min_value_x, min_value_y=min_value_y,
+                                            max_value_x=half_value_x-1, max_value_y=half_value_y-1)
+    if Q2 == False:
+        for i in range(Q2_range[0], Q2_range[1]+1):
+            search_df = search_df[search_df['morton'] != i]
+    else:
+        search_df = identifyNonRelvantAreas(m, geofence, search_df, min_value_x=half_value_x, min_value_y=min_value_y,
+                                            max_value_x=max_value_x, max_value_y=half_value_y - 1)
+    if Q3 == False:
+        for i in range(Q3_range[0], Q3_range[1]+1):
+            search_df = search_df[search_df['morton'] != i]
+    else:
+        search_df = identifyNonRelvantAreas(m, geofence, search_df, min_value_x=min_value_x, min_value_y=half_value_y,
+                                            max_value_x=half_value_x - 1, max_value_y=max_value_y)
+    if Q4 == False:
+        for i in range(Q4_range[0], Q4_range[1]+1):
+            search_df = search_df[search_df['morton'] != i]
+    else:
+        search_df = identifyNonRelvantAreas(m, geofence, search_df, min_value_x=half_value_x, min_value_y=half_value_y,
+                                            max_value_x=max_value_x, max_value_y=max_value_y)
+
+    return search_df
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -203,7 +307,7 @@ if __name__ == '__main__':
 
             plotScatterAnnotationLatentSpace_df(df_array, 'morton', ax)
 
-            geofence = [[0,6], [4,9]]
+            geofence = [[0,0], [3,8]]
 
             search(geofence, df_array, 'morton', m, ax)
 
