@@ -139,25 +139,6 @@ def calculateSampleRate(resolution, m):
     print("The maximum Morton Distance ist caluclatet as ", sampleRate, " between P_ref", max_A, "and P_min=", max_B)
 
 
-def search(Point_a, Point_b):
-
-    Q1 = [[int((max_value / 2) + 0.5), int((max_value / 2) + 0.5)],
-          [max_value, int((max_value / 2) + 0.5)]]  # oben rechts
-    Q2 = [[0, int((max_value / 2) + 0.5)], [int((max_value / 2) - 0.5), int((max_value / 2) + 0.5)]]  # oben links
-    Q3 = [[0, 0], [0, int((max_value / 2) - 0.5)]]  # unten links
-    Q4 = [[max_value, int((max_value / 2) + 0.5)], [max_value, 0]]  # unten rechts
-
-    hilbert_Q1 = hilbert_curve.distances_from_points(Q1)
-    hilbert_Q2 = hilbert_curve.distances_from_points(Q2)
-    hilbert_Q3 = hilbert_curve.distances_from_points(Q3)
-    hilbert_Q4 = hilbert_curve.distances_from_points(Q4)
-
-    print(hilbert_Q1)
-    print(hilbert_Q2)
-    print(hilbert_Q3)
-    print(hilbert_Q4)
-
-
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -179,7 +160,7 @@ if __name__ == '__main__':
 
             print("Hello...")
 
-            resolution = 3  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
+            resolution = 4  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
             rangeThreshold = 1.1
 
             print("Let's determine the (half) Sample Rate in latent space;"
@@ -208,7 +189,10 @@ if __name__ == '__main__':
 
             plotScatterAnnotationLatentSpace_df(df_array, 'morton')
 
-            # search(2)
+            geofence = [[0,6], [4,9]]
+
+            search()
+
 
             # plotScatterAnnotationLatentSpace_df(df_array, m)
 
