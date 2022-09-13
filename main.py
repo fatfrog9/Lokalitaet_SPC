@@ -8,6 +8,7 @@ import multiprocessing
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 import morton
 from tqdm import tqdm
 import sys
@@ -36,19 +37,19 @@ def generateArray_df_morton(resolution, dimension):
     return df_array, m, hilbert_curve
 
 
-def plotScatterAnnotationLatentSpace_df(df_array, curve):
+def plotScatterAnnotationLatentSpace_df(df_array, curve, ax):
 
-    df_array.plot(x = 'x', y = 'y', marker="o")
-    for idx, row in df_array.iterrows():
-        plt.annotate(row[curve], (row['x']+0.02, row['y']+0.02))
+    #df_array.plot(x = 'x', y = 'y', marker="o", ax = ax)
+    #for idx, row in df_array.iterrows():
+    #    ax.annotate(row[curve], (row['x']+0.02, row['y']+0.02))
 
     df_array = df_array.sort_values(by=curve)
     # print(df_array)
     df_array.reset_index()
 
-    df_array.plot(x='x', y='y', marker="o")
+    df_array.plot(x='x', y='y', marker="o", ax=ax, label="morton")
     for idx, row in df_array.iterrows():
-        plt.annotate(row[curve], (row['x'] + 0.02, row['y'] + 0.02))
+        ax.annotate(row[curve], (row['x'] + 0.02, row['y'] + 0.02))
 
 
 def calcMaximumDistanceBetweenPoints(np_array_morton):
@@ -138,7 +139,19 @@ def calculateSampleRate(resolution, m):
     sampleRate = (m.pack(0, int((max_value / 2) + 0.5)) - m.pack(0, int((max_value / 2) - 0.5))) # *2 <- für die eigentliche Rate, hier berechnen wir erstmal nur die Distanz
     print("The maximum Morton Distance ist caluclatet as ", sampleRate, " between P_ref", max_A, "and P_min=", max_B)
 
+def search(geofence, df_array, curve, m, ax):
+    A = geofence[0]
+    C = geofence[1]
+    B = [A[0], C[1]]
+    D = [A[1], C[0]]
 
+    search_space = [m.pack(A[0], A[1]), m.pack(C[0], C[1])]
+
+    ax.add_patch(Rectangle((A[0]-0.25, A[1]-0.25), C[0]-A[0]+0.5, C[1]-A[1]+0.5, fill=False, color='red', lw = 2))
+
+    df_array[(df_array.morton >= search_space[0]) & (df_array.morton <= search_space[1])].sort_values(by='morton').reset_index().plot(x='x', y='y', marker="o", ax=ax, label="SearchSpace")
+
+    print("Search space for geofence:", geofence, "requires search between", search_space[0], "and", search_space[1], "resulting in", search_space[1]-search_space[0], "queries")
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -172,8 +185,9 @@ if __name__ == '__main__':
 
             print("Generate array.")
             df_array, m, hilbert_curve = generateArray_df_morton(resolution=resolution, dimension=2)
+            fig, ax = plt.subplots()
 
-            print(df_array)
+            # print(df_array)
 
             #determineSampleRateExperimental(df_array, rangeThreshold, 'morton')
             #determineSampleRateExperimental(df_array, rangeThreshold, 'hilbert')
@@ -187,11 +201,11 @@ if __name__ == '__main__':
 
             # these values are hilbert curve specific
 
-            plotScatterAnnotationLatentSpace_df(df_array, 'morton')
+            plotScatterAnnotationLatentSpace_df(df_array, 'morton', ax)
 
             geofence = [[0,6], [4,9]]
 
-            search()
+            search(geofence, df_array, 'morton', m, ax)
 
 
             # plotScatterAnnotationLatentSpace_df(df_array, m)
