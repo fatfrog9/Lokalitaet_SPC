@@ -139,6 +139,26 @@ def calculateSampleRate(resolution, m):
     print("The maximum Morton Distance ist caluclatet as ", sampleRate, " between P_ref", max_A, "and P_min=", max_B)
 
 
+def search(Point_a, Point_b):
+
+    Q1 = [[int((max_value / 2) + 0.5), int((max_value / 2) + 0.5)],
+          [max_value, int((max_value / 2) + 0.5)]]  # oben rechts
+    Q2 = [[0, int((max_value / 2) + 0.5)], [int((max_value / 2) - 0.5), int((max_value / 2) + 0.5)]]  # oben links
+    Q3 = [[0, 0], [0, int((max_value / 2) - 0.5)]]  # unten links
+    Q4 = [[max_value, int((max_value / 2) + 0.5)], [max_value, 0]]  # unten rechts
+
+    hilbert_Q1 = hilbert_curve.distances_from_points(Q1)
+    hilbert_Q2 = hilbert_curve.distances_from_points(Q2)
+    hilbert_Q3 = hilbert_curve.distances_from_points(Q3)
+    hilbert_Q4 = hilbert_curve.distances_from_points(Q4)
+
+    print(hilbert_Q1)
+    print(hilbert_Q2)
+    print(hilbert_Q3)
+    print(hilbert_Q4)
+
+
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
@@ -159,7 +179,7 @@ if __name__ == '__main__':
 
             print("Hello...")
 
-            resolution = 2  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
+            resolution = 3  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
             rangeThreshold = 1.1
 
             print("Let's determine the (half) Sample Rate in latent space;"
@@ -172,20 +192,24 @@ if __name__ == '__main__':
             print("Generate array.")
             df_array, m, hilbert_curve = generateArray_df_morton(resolution=resolution, dimension=2)
 
-            # print(df_array)
+            print(df_array)
 
             #determineSampleRateExperimental(df_array, rangeThreshold, 'morton')
-            determineSampleRateExperimental(df_array, rangeThreshold, 'hilbert')
-            calculateSampleRate(resolution, m)
+            #determineSampleRateExperimental(df_array, rangeThreshold, 'hilbert')
+            #calculateSampleRate(resolution, m)
 
             print()
             # print("Determine maximum distance of datapoint with a resolution of", resolution, "Bits.")
             # calcMaximumDistanceBetweenPoints(np_array_morton)
 
+            #plotScatterAnnotationLatentSpace_df(df_array, 'morton')
+
+            # these values are hilbert curve specific
+
             plotScatterAnnotationLatentSpace_df(df_array, 'morton')
-            plotScatterAnnotationLatentSpace_df(df_array, 'hilbert')
-            # df_array.rename(columns={'x': 'y',
-            #            'y': 'x'}, inplace=True)
+
+            # search(2)
+
             # plotScatterAnnotationLatentSpace_df(df_array, m)
 
             plt.show()
