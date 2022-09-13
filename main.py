@@ -158,7 +158,12 @@ def search(geofence, df_array, curve, m, ax):
     search_df = identifyNonRelvantAreas(m, geofence, search_df, min, min, max, max)
     search_df.sort_values(by='morton').reset_index().plot(x='x', y='y', marker="o", ax=ax, label="SearchSpace")
 
-    print("Search space for geofence:", geofence, "requires search between", search_space[0], "and", search_space[1], "requires", search_df['morton'].count(), "queries.", )
+    geofence_area = (C[0] - A[0] + 1) * (C[1] - A[1] + 1)
+    search_area = len(search_df.axes[0])
+    precision = geofence_area / (geofence_area + (search_area - geofence_area))
+
+    print("Search space for geofence:", geofence, "requires search between", search_space[0], "and", search_space[1], "requires", search_area, "queries to search ", geofence_area, "entries." )
+    print("Precision of", round(precision, 3))
 
 
 def identifyNonRelvantAreas(m, geofence, search_df, min_value_x, min_value_y, max_value_x, max_value_y):
