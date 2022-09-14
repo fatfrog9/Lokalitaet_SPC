@@ -165,10 +165,11 @@ def search(geofence, df_array, curve, m, ax):
     print("Search space for geofence:", geofence, "requires search between", search_space[0], "and", search_space[1], "requires", search_area, "queries to search ", geofence_area, "entries." )
     print("Precision of", round(precision, 3))
 
+    return search_df
 
 def identifyNonRelvantAreas(m, geofence, search_df, min_value_x, min_value_y, max_value_x, max_value_y):
 
-    if (m.pack(max_value_x, max_value_y) - m.pack(min_value_x, min_value_y)) <=15:
+    if (m.pack(max_value_x, max_value_y) - m.pack(min_value_x, min_value_y)) <=3:
         return search_df
 
     A = geofence[0]
@@ -294,7 +295,9 @@ if __name__ == '__main__':
 
             print("Generate array.")
             df_array, m, hilbert_curve = generateArray_df_morton(resolution=resolution, dimension=2)
-            fig, ax = plt.subplots()
+
+            fig, ax = plt.subplots(2, gridspec_kw={'height_ratios':[5,1]})
+            fig.canvas.set_window_title('Search Space with Morton Codes')
 
             # print(df_array)
 
@@ -310,16 +313,28 @@ if __name__ == '__main__':
 
             # these values are hilbert curve specific
 
-            plotScatterAnnotationLatentSpace_df(df_array, 'morton', ax)
+            plotScatterAnnotationLatentSpace_df(df_array, 'morton', ax=ax[0])
 
-            geofence = [[0,0], [3,8]]
+            geofence = [[8,7], [10,8]]
 
-            search(geofence, df_array, 'morton', m, ax)
+            search_df = search(geofence, df_array, 'morton', m, ax[0])
+            ax[0].title.set_text('Search area')
 
+            min = df_array['morton'].min()
+            max = df_array['morton'].max()
+
+            ax[1].hist(search_df['morton'], bins=range(min, max + 1))
+            ax[1].set_xlim(min,max)
+            ax[1].title.set_text('Search area in latent space')
+
+            fig.tight_layout()
+            plt.show()
 
             # plotScatterAnnotationLatentSpace_df(df_array, m)
 
-            plt.show()
+
+
+
 
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
