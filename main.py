@@ -21,6 +21,7 @@ dim3 = False
 
 
 def generateArray_df_morton(resolution, dimension):
+    print("Generate array.")
     max_value = (2 ** resolution)
     dim = 2 if dim3 == False else 3
     m = morton.Morton(dimensions=dimension, bits=resolution)
@@ -266,21 +267,6 @@ def identifyNonRelvantAreas(m, geofence, search_df, min_value_x, min_value_y, ma
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
-    # if len(sys.argv) != 2:
-    #     print('Invalid Numbers of Arguments. Script will be terminated.')
-    #
-    # else:
-    #     try:
-    #         n = int(sys.argv[1])
-    #     except IndexError:
-    #         print('missing argument')
-    #     except ValueError:
-    #         print('argument must be an integer')
-    #     else:
-    #         if n <= 0:
-    #             print('argument must be non-negative ang greater than 0')
-    #         else:
-
             print("Hello...")
 
             resolution = 4  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
@@ -293,25 +279,11 @@ if __name__ == '__main__':
 
             print("The resolution is set to", resolution, "Bits.")
 
-            print("Generate array.")
+
             df_array, m, hilbert_curve = generateArray_df_morton(resolution=resolution, dimension=2)
 
             fig, ax = plt.subplots(2, gridspec_kw={'height_ratios':[5,1]})
             fig.canvas.set_window_title('Search Space with Morton Codes')
-
-            # print(df_array)
-
-            #determineSampleRateExperimental(df_array, rangeThreshold, 'morton')
-            #determineSampleRateExperimental(df_array, rangeThreshold, 'hilbert')
-            #calculateSampleRate(resolution, m)
-
-            print()
-            # print("Determine maximum distance of datapoint with a resolution of", resolution, "Bits.")
-            # calcMaximumDistanceBetweenPoints(np_array_morton)
-
-            #plotScatterAnnotationLatentSpace_df(df_array, 'morton')
-
-            # these values are hilbert curve specific
 
             plotScatterAnnotationLatentSpace_df(df_array, 'morton', ax=ax[0])
 
