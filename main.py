@@ -5,6 +5,8 @@
 import math
 import multiprocessing
 
+import time
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -289,7 +291,10 @@ if __name__ == '__main__':
 
             geofence = [[8,7], [10,8]]
 
+            search_start = time.time()
             search_df = search(geofence, df_array, 'morton', m, ax[0])
+            search_end = time.time()
+            print("Binary search needs", round(search_end-search_start,5), "secounds.")
             ax[0].title.set_text('Search area')
 
             min = df_array['morton'].min()
