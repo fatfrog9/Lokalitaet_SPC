@@ -142,46 +142,198 @@ def calculateSampleRate(resolution, m):
     sampleRate = (m.pack(0, int((max_value / 2) + 0.5)) - m.pack(0, int((max_value / 2) - 0.5))) # *2 <- für die eigentliche Rate, hier berechnen wir erstmal nur die Distanz
     print("The maximum Morton Distance ist caluclatet as ", sampleRate, " between P_ref", max_A, "and P_min=", max_B)
 
-def search(geofence, df_array, curve, m, ax):
-    A = geofence[0]
-    C = geofence[1]
+# def search(geofence, df_array, curve, m, ax):
+#     offset = 10
+#     faktor_multiply = 10000
+#
+#     A = [0, 0]  # geofence[0]
+#     A[0] = int((geofence[0][0] + offset) * faktor_multiply)
+#     A[1] = int((geofence[0][1] + offset) * faktor_multiply)
+#     C = [0, 0]  # geofence[1]
+#     C[0] = int((geofence[1][0] + offset) * faktor_multiply)
+#     C[1] = int((geofence[1][1] + offset) * faktor_multiply)
+#     B = [A[0], C[1]]
+#     D = [A[1], C[0]]
+#
+#     search_space = [m.pack(A[0], A[1]), m.pack(C[0], C[1])]
+#
+#     ax.add_patch(Rectangle((A[0]-0.25, A[1]-0.25), C[0]-A[0]+0.5, C[1]-A[1]+0.5, fill=False, color='red', lw = 2))
+#
+#     #df_array[(df_array.morton >= search_space[0]) & (df_array.morton <= search_space[1])].sort_values(by='morton').reset_index().plot(x='x', y='y', marker="o", ax=ax, label="SearchSpace")
+#
+#     search_mask = df_array[(df_array.morton >= search_space[0]) & (df_array.morton <= search_space[1])]
+#
+#     min = 0
+#     max = (2**resolution)-1
+#     search_mask = identifyNonRelvantAreas(m, geofence, search_mask, min, min, max, max)
+#     search_mask.sort_values(by='morton').reset_index().plot(x='x', y='y', marker="o", ax=ax, label="SearchSpace")
+#
+#     geofence_area = (C[0] - A[0] + 1) * (C[1] - A[1] + 1)
+#     search_area = len(search_mask.axes[0])
+#     precision = geofence_area / (geofence_area + (search_area - geofence_area))
+#
+#     print("Search space for geofence:", geofence, "requires search between", search_space[0], "and", search_space[1], "requires", search_area, "queries to search ", geofence_area, "entries." )
+#     print("Precision of", round(precision, 3))
+#
+#     return search_mask
+#
+# def identifyNonRelvantAreas(m, geofence, search_mask, min_value_x, min_value_y, max_value_x, max_value_y, offset, faktor_multiply):
+#
+#     if (m.pack(max_value_x, max_value_y) - m.pack(min_value_x, min_value_y)) <=3:
+#         return search_mask
+#
+#     A = [0, 0]  # geofence[0]
+#     A[0] = int((geofence[0][0] + offset) * faktor_multiply)
+#     A[1] = int((geofence[0][1] + offset) * faktor_multiply)
+#     C = [0, 0]  # geofence[1]
+#     C[0] = int((geofence[1][0] + offset) * faktor_multiply)
+#     C[1] = int((geofence[1][1] + offset) * faktor_multiply)
+#
+#     half_value_x = int(((max_value_x - min_value_x) / 2) + 0.5 + min_value_x)
+#     half_value_y = int(((max_value_y - min_value_y) / 2) + 0.5 + min_value_y)
+#
+#     # search_mask = df_array[['x', 'y', 'morton']]
+#
+#     Q1 = False
+#     Q2 = False
+#     Q3 = False
+#     Q4 = False
+#
+#     if (A[0] < half_value_x) & (A[1] < half_value_y) & (C[0] >= half_value_x) & (C[1] >= half_value_y):
+#         # alle
+#         Q1 = True
+#         Q2 = True
+#         Q3 = True
+#         Q4 = True
+#     elif (A[0] < half_value_x) & (A[1] >= half_value_y) & (C[0] >= half_value_x) & (C[1] >= half_value_y):
+#         # oben beide
+#         Q3 = True
+#         Q4 = True
+#     elif (A[0] < half_value_x) & (A[1] < half_value_y) & (C[0] >= half_value_x) & (C[1] < half_value_y):
+#         # unten beide
+#         Q1 = True
+#         Q2 = True
+#     elif (A[0] < half_value_x) & (A[1] < half_value_y) & (C[0] < half_value_x) & (C[1] >= half_value_y):
+#         # links beide
+#         Q1 = True
+#         Q3 = True
+#     elif (A[0] >= half_value_x) & (A[1] < half_value_y) & (C[0] >= half_value_x) & (C[1] >= half_value_y):
+#         # rechts beide
+#         Q2 = True
+#         Q4 = True
+#     elif (A[0] < half_value_x) & (A[1] >= half_value_y) & (C[0] < half_value_x) & (C[1] >= half_value_y):
+#         # oben links
+#         Q3 = True
+#     elif (A[0] < half_value_x) & (A[1] < half_value_y) & (C[0] < half_value_x) & (C[1] < half_value_y):
+#         # unten links
+#         Q1 = True
+#     elif (A[0] >= half_value_x) & (A[1] < half_value_y) & (C[0] >= half_value_x) & (C[1] < half_value_y):
+#         # unten rechts
+#         Q2 = True
+#     elif (A[0] >= half_value_x) & (A[1] >= half_value_y) & (C[0] >= half_value_x) & (C[1] >= half_value_y):
+#         # oben rechts
+#         Q4 = True
+#     else:
+#         #irgendwas stimmt mit der eingabe nicht
+#         sys.exit("Geofence is incorrect; please check!")
+#
+#     Q1_range = (m.pack(min_value_x, min_value_y), m.pack((half_value_x-1), (half_value_y-1)))
+#     Q2_range = (m.pack(half_value_x, min_value_y), m.pack(max_value_x, (half_value_y - 1)))
+#     Q3_range = (m.pack(min_value_x, half_value_y), m.pack((half_value_x - 1), max_value_y))
+#     Q4_range = (m.pack(half_value_x, half_value_y), m.pack(max_value_x, max_value_y))
+#
+#     # print("Q1", Q1_range, "Q2", Q2_range, "Q3", Q3_range, "Q4", Q4_range)
+#
+#     #Q1_range = (0, 63)
+#     #Q2_range = (64, 127)
+#     #Q3_range = (128, 191)
+#     #Q4_range = (192, 255)
+#
+#     if Q1 == False:
+#         search_mask = search_mask.drop(search_mask[(search_mask.morton < Q1_range[1]+1) & (search_mask.morton > Q1_range[0])].index)
+#     else:
+#         search_mask = identifyNonRelvantAreas(m, geofence, search_mask, min_value_x=min_value_x, min_value_y=min_value_y,
+#                                             max_value_x=half_value_x-1, max_value_y=half_value_y-1, offset=offset, faktor_multiply=faktor_multiply)
+#     if Q2 == False:
+#         search_mask = search_mask.drop(search_mask[(search_mask.morton < Q2_range[1]+1) & (search_mask.morton > Q2_range[0])].index)
+#     else:
+#         search_mask = identifyNonRelvantAreas(m, geofence, search_mask, min_value_x=half_value_x, min_value_y=min_value_y,
+#                                             max_value_x=max_value_x, max_value_y=half_value_y - 1, offset=offset, faktor_multiply=faktor_multiply)
+#     if Q3 == False:
+#         search_mask = search_mask.drop(search_mask[(search_mask.morton < Q3_range[1]+1) & (search_mask.morton > Q3_range[0])].index)
+#     else:
+#         search_mask = identifyNonRelvantAreas(m, geofence, search_mask, min_value_x=min_value_x, min_value_y=half_value_y,
+#                                             max_value_x=half_value_x - 1, max_value_y=max_value_y, offset=offset, faktor_multiply=faktor_multiply)
+#     if Q4 == False:
+#         search_mask = search_mask.drop(search_mask[(search_mask.morton < Q4_range[1]+1) & (search_mask.morton > Q4_range[0])].index)
+#     else:
+#         search_mask = identifyNonRelvantAreas(m, geofence, search_mask, min_value_x=half_value_x, min_value_y=half_value_y,
+#                                             max_value_x=max_value_x, max_value_y=max_value_y, offset=offset, faktor_multiply=faktor_multiply)
+#
+#     return search_mask
+
+################################################################
+
+def transfer_Geofence_to_Morton(geofence, m, resolution, resolution_search_space):
+    offset = 0
+
+    faktor_multiply = 1
+
+    A = [0,0] #geofence[0]
+    A[0] = int((geofence[0][0] + offset) * faktor_multiply)
+    A[1] = int((geofence[0][1] + offset) * faktor_multiply)
+    C = [0,0] #geofence[1]
+    C[0] = int((geofence[1][0] + offset) * faktor_multiply)
+    C[1] = int((geofence[1][1] + offset) * faktor_multiply)
     B = [A[0], C[1]]
     D = [A[1], C[0]]
 
-    search_space = [m.pack(A[0], A[1]), m.pack(C[0], C[1])]
+    search_space = [m.pack(A[0], A[1]), m.pack(C[0], C[1])] # geofence in morton bereich; erste Wertebereich ermittlung
 
-    ax.add_patch(Rectangle((A[0]-0.25, A[1]-0.25), C[0]-A[0]+0.5, C[1]-A[1]+0.5, fill=False, color='red', lw = 2))
+    #ax.add_patch(Rectangle((A[0]-0.25, A[1]-0.25), C[0]-A[0]+0.5, C[1]-A[1]+0.5, fill=False, color='red', lw = 2))
 
     #df_array[(df_array.morton >= search_space[0]) & (df_array.morton <= search_space[1])].sort_values(by='morton').reset_index().plot(x='x', y='y', marker="o", ax=ax, label="SearchSpace")
 
-    search_df = df_array[(df_array.morton >= search_space[0]) & (df_array.morton <= search_space[1])]
+    np_ar = np.arange(search_space[0], (search_space[1]+1), resolution_search_space)
+    search_mask = pd.DataFrame(np_ar, columns = ['morton'])
+    #print(len(search_mask))
+
+    # search_mask = df_array[(df_array.morton >= search_space[0]) & (df_array.morton <= search_space[1])]
 
     min = 0
     max = (2**resolution)-1
-    search_df = identifyNonRelvantAreas(m, geofence, search_df, min, min, max, max)
-    search_df.sort_values(by='morton').reset_index().plot(x='x', y='y', marker="o", ax=ax, label="SearchSpace")
 
-    geofence_area = (C[0] - A[0] + 1) * (C[1] - A[1] + 1)
-    search_area = len(search_df.axes[0])
-    precision = geofence_area / (geofence_area + (search_area - geofence_area))
 
-    print("Search space for geofence:", geofence, "requires search between", search_space[0], "and", search_space[1], "requires", search_area, "queries to search ", geofence_area, "entries." )
-    print("Precision of", round(precision, 3))
 
-    return search_df
+    search_mask = identifyNonRelvantAreas(m, geofence, search_mask, min, min, max, max, offset, faktor_multiply)
 
-def identifyNonRelvantAreas(m, geofence, search_df, min_value_x, min_value_y, max_value_x, max_value_y):
+    #search_mask.sort_values(by='morton').reset_index().plot(x='x', y='y', marker="o", ax=ax, label="SearchSpace")
+
+    return search_mask
+
+################################################################
+
+def identifyNonRelvantAreas(m, geofence, search_mask, min_value_x, min_value_y, max_value_x, max_value_y, offset, faktor_multiply):
+
+    # print("identification of non relevant areas", min_value_x, min_value_y, ";", max_value_x, max_value_y, "search_mask has", len(search_mask.index), "lines.")
 
     if (m.pack(max_value_x, max_value_y) - m.pack(min_value_x, min_value_y)) <=3:
-        return search_df
+        return search_mask
 
-    A = geofence[0]
-    C = geofence[1]
+    A = [0, 0]  # geofence[0]
+    A[0] = int((geofence[0][0] + offset) * faktor_multiply)
+    A[1] = int((geofence[0][1] + offset) * faktor_multiply)
+    C = [0, 0]  # geofence[1]
+    C[0] = int((geofence[1][0] + offset) * faktor_multiply)
+    C[1] = int((geofence[1][1] + offset) * faktor_multiply)
+
+    #A = geofence[0]
+    #C = geofence[1]
 
     half_value_x = int(((max_value_x - min_value_x) / 2) + 0.5 + min_value_x)
     half_value_y = int(((max_value_y - min_value_y) / 2) + 0.5 + min_value_y)
 
-    # search_df = df_array[['x', 'y', 'morton']]
+    # search_mask = df_array[['x', 'y', 'morton']]
 
     Q1 = False
     Q2 = False
@@ -231,39 +383,31 @@ def identifyNonRelvantAreas(m, geofence, search_df, min_value_x, min_value_y, ma
     Q3_range = (m.pack(min_value_x, half_value_y), m.pack((half_value_x - 1), max_value_y))
     Q4_range = (m.pack(half_value_x, half_value_y), m.pack(max_value_x, max_value_y))
 
-    # print("Q1", Q1_range, "Q2", Q2_range, "Q3", Q3_range, "Q4", Q4_range)
-
-    #Q1_range = (0, 63)
-    #Q2_range = (64, 127)
-    #Q3_range = (128, 191)
-    #Q4_range = (192, 255)
 
     if Q1 == False:
-        for i in range(Q1_range[0], Q1_range[1]+1):
-            search_df = search_df[search_df['morton'] != i]
+        search_mask = search_mask.drop(search_mask[(search_mask.morton < (Q1_range[1]+1)) & (search_mask.morton >= Q1_range[0])].index)
     else:
-        search_df = identifyNonRelvantAreas(m, geofence, search_df, min_value_x=min_value_x, min_value_y=min_value_y,
-                                            max_value_x=half_value_x-1, max_value_y=half_value_y-1)
+        search_mask = identifyNonRelvantAreas(m, geofence, search_mask, min_value_x=min_value_x, min_value_y=min_value_y, max_value_x=half_value_x-1, max_value_y=half_value_y-1, offset=offset, faktor_multiply=faktor_multiply)
     if Q2 == False:
-        for i in range(Q2_range[0], Q2_range[1]+1):
-            search_df = search_df[search_df['morton'] != i]
+        search_mask = search_mask.drop(search_mask[(search_mask.morton < (Q2_range[1] + 1)) & (search_mask.morton >= Q2_range[0])].index)
     else:
-        search_df = identifyNonRelvantAreas(m, geofence, search_df, min_value_x=half_value_x, min_value_y=min_value_y,
-                                            max_value_x=max_value_x, max_value_y=half_value_y - 1)
+        search_mask = identifyNonRelvantAreas(m, geofence, search_mask, min_value_x=half_value_x, min_value_y=min_value_y,
+                                            max_value_x=max_value_x, max_value_y=half_value_y - 1, offset=offset, faktor_multiply=faktor_multiply)
     if Q3 == False:
-        for i in range(Q3_range[0], Q3_range[1]+1):
-            search_df = search_df[search_df['morton'] != i]
+        search_mask = search_mask.drop(search_mask[(search_mask.morton < (Q3_range[1] + 1)) & (search_mask.morton >= Q3_range[0])].index)
     else:
-        search_df = identifyNonRelvantAreas(m, geofence, search_df, min_value_x=min_value_x, min_value_y=half_value_y,
-                                            max_value_x=half_value_x - 1, max_value_y=max_value_y)
+        search_mask = identifyNonRelvantAreas(m, geofence, search_mask, min_value_x=min_value_x, min_value_y=half_value_y,
+                                            max_value_x=half_value_x - 1, max_value_y=max_value_y, offset=offset, faktor_multiply=faktor_multiply)
     if Q4 == False:
-        for i in range(Q4_range[0], Q4_range[1]+1):
-            search_df = search_df[search_df['morton'] != i]
+        search_mask = search_mask.drop(search_mask[(search_mask.morton < (Q4_range[1] + 1)) & (search_mask.morton >= Q4_range[0])].index)
     else:
-        search_df = identifyNonRelvantAreas(m, geofence, search_df, min_value_x=half_value_x, min_value_y=half_value_y,
-                                            max_value_x=max_value_x, max_value_y=max_value_y)
+        search_mask = identifyNonRelvantAreas(m, geofence, search_mask, min_value_x=half_value_x, min_value_y=half_value_y,
+                                            max_value_x=max_value_x, max_value_y=max_value_y, offset=offset, faktor_multiply=faktor_multiply)
 
-    return search_df
+    return search_mask
+
+
+################################################################
 
 
 # Press the green button in the gutter to run the script.
@@ -292,15 +436,27 @@ if __name__ == '__main__':
             geofence = [[8,7], [10,8]]
 
             search_start = time.time()
-            search_df = search(geofence, df_array, 'morton', m, ax[0])
+            # search_mask = search(geofence, df_array, 'morton', m, ax[0])
+            search_mask = transfer_Geofence_to_Morton(geofence, m, resolution, 1)
             search_end = time.time()
             print("Binary search needs", round(search_end-search_start,5), "secounds.")
             ax[0].title.set_text('Search area')
+            ax[0].add_patch(
+                Rectangle((geofence[0][0] - 0.25, geofence[0][1] - 0.25), geofence[1][0] - geofence[0][0] + 0.5, geofence[1][1] - geofence[0][1] + 0.5, fill=False, color='red',
+                          lw=2))
+            # print(search_mask)
+
+            filter = df_array["morton"].isin(search_mask['morton'])
+            df_relevant_values = df_array[filter]
+
+            df_relevant_values.sort_values(by='morton').reset_index().plot(x='x', y='y', marker="o", ax=ax[0],
+                                                                    label="SearchSpace")
+
 
             min = df_array['morton'].min()
             max = df_array['morton'].max()
 
-            ax[1].hist(search_df['morton'], bins=range(min, max + 1))
+            ax[1].hist(search_mask['morton'], bins=range(min, max + 1))
             ax[1].set_xlim(min,max)
             ax[1].title.set_text('Search area in latent space')
 
