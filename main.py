@@ -16,6 +16,7 @@ from tqdm import tqdm
 import sys
 from scipy.spatial import distance
 from hilbertcurve.hilbertcurve import HilbertCurve
+import random
 from decimal import *
 
 
@@ -141,6 +142,27 @@ def calculateSampleRate(resolution, m):
 
     sampleRate = (m.pack(0, int((max_value / 2) + 0.5)) - m.pack(0, int((max_value / 2) - 0.5))) # *2 <- für die eigentliche Rate, hier berechnen wir erstmal nur die Distanz
     print("The maximum Morton Distance ist caluclatet as ", sampleRate, " between P_ref", max_A, "and P_min=", max_B)
+
+def calc_Performance(geofence, search_mask, m):
+
+    flag = True
+    # check, whether each point is considered:
+    for x in range(geofence[0][0], geofence[1][0] + 1):
+        for y in range(geofence[0][1], geofence[1][1] + 1):
+            morton = m.pack(x, y)
+            if not (search_mask.isin([morton]).any().any()) == True:
+                flag = False
+
+    #print("All areas covered:", flag)
+
+    geofence_area = (geofence[1][0] - geofence[0][0] + 1) * (geofence[1][1] - geofence[0][1] + 1)
+    search_area = len(search_mask.axes[0])
+    precision = geofence_area / (geofence_area + (search_area - geofence_area))
+
+    #print("Precision:", precision)
+
+    return flag, precision
+
 
 # def search(geofence, df_array, curve, m, ax):
 #     offset = 10
@@ -413,57 +435,89 @@ def identifyNonRelvantAreas(m, geofence, search_mask, min_value_x, min_value_y, 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
-            print("Hello...")
+    print("Hello...")
 
-            resolution = 4  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
-            rangeThreshold = 1.1
+    results = pd.DataFrame(
+        columns=['resolution', 'geofence_x_min', 'geofence_y_min', 'geofence_x_max', 'geofence_y_max',
+                 'duration_binary', 'covered', 'precision'])
 
-            print("Let's determine the (half) Sample Rate in latent space;"
-                    "maximum distance between points that have an euclidean distance of max: ", rangeThreshold)
+    for resolution in range(2,12):
+        #resolution = 4  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
+        rangeThreshold = 1.1
 
-            #for resolution in range(2,3):
+        #print("Let's determine the (half) Sample Rate in latent space;"
+        #        "maximum distance between points that have an euclidean distance of max: ", rangeThreshold)
 
-            print("The resolution is set to", resolution, "Bits.")
+        #for resolution in range(2,3):
+
+        print("The resolution is set to", resolution, "Bits.")
 
 
-            df_array, m, hilbert_curve = generateArray_df_morton(resolution=resolution, dimension=2)
+        df_array, m, hilbert_curve = generateArray_df_morton(resolution=resolution, dimension=2)
 
-            fig, ax = plt.subplots(2, gridspec_kw={'height_ratios':[5,1]})
-            fig.canvas.set_window_title('Search Space with Morton Codes')
+        #fig, ax = plt.subplots(2, gridspec_kw={'height_ratios':[5,1]})
+        #fig.canvas.set_window_title('Search Space with Morton Codes')
 
-            plotScatterAnnotationLatentSpace_df(df_array, 'morton', ax=ax[0])
+        #plotScatterAnnotationLatentSpace_df(df_array, 'morton', ax=ax[0])
 
-            geofence = [[8,7], [10,8]]
+        for i in tqdm(range(0,1000)):
+
+            x_min = random.randint(0, 2**resolution-1)
+            y_min = random.randint(0, 2**resolution-1)
+            x_max = random.randint(x_min, 2**resolution-1)
+            y_max = random.randint(y_min, 2**resolution-1)
+
+            geofence = [[x_min, y_min], [x_max, y_max]]
+
+            #print("Geofence: ", geofence)
 
             search_start = time.time()
             # search_mask = search(geofence, df_array, 'morton', m, ax[0])
             search_mask = transfer_Geofence_to_Morton(geofence, m, resolution, 1)
             search_end = time.time()
-            print("Binary search needs", round(search_end-search_start,5), "secounds.")
-            ax[0].title.set_text('Search area')
-            ax[0].add_patch(
-                Rectangle((geofence[0][0] - 0.25, geofence[0][1] - 0.25), geofence[1][0] - geofence[0][0] + 0.5, geofence[1][1] - geofence[0][1] + 0.5, fill=False, color='red',
-                          lw=2))
-            # print(search_mask)
+            #print("Binary search needs", round(search_end-search_start,5), "secounds.")
 
-            filter = df_array["morton"].isin(search_mask['morton'])
-            df_relevant_values = df_array[filter]
+            covered, precision = calc_Performance(geofence, search_mask, m)
 
-            df_relevant_values.sort_values(by='morton').reset_index().plot(x='x', y='y', marker="o", ax=ax[0],
-                                                                    label="SearchSpace")
+            temp = pd.DataFrame({'resolution': resolution,
+                                      'geofence_x_min': geofence[0][0],
+                                      'geofence_y_min': geofence[0][1],
+                                      'geofence_x_max': geofence[1][0],
+                                      'geofence_y_max': geofence[1][1],
+                                      'duration_binary': round(search_end-search_start,5),
+                                      'covered': covered,
+                                      'precision': round(precision,7)}, index=[0])
+
+            results = pd.concat([results, temp], ignore_index=True, sort=False)
 
 
-            min = df_array['morton'].min()
-            max = df_array['morton'].max()
-
-            ax[1].hist(search_mask['morton'], bins=range(min, max + 1))
-            ax[1].set_xlim(min,max)
-            ax[1].title.set_text('Search area in latent space')
-
-            fig.tight_layout()
-            plt.show()
+            # ax[0].title.set_text('Search area')
+            # ax[0].add_patch(
+            #     Rectangle((geofence[0][0] - 0.25, geofence[0][1] - 0.25), geofence[1][0] - geofence[0][0] + 0.5, geofence[1][1] - geofence[0][1] + 0.5, fill=False, color='red',
+            #               lw=2))
+            # # print(search_mask)
+            #
+            # filter = df_array["morton"].isin(search_mask['morton'])
+            # df_relevant_values = df_array[filter]
+            #
+            # df_relevant_values.sort_values(by='morton').reset_index().plot(x='x', y='y', marker="o", ax=ax[0],
+            #                                                         label="SearchSpace")
+            #
+            #
+            # min = df_array['morton'].min()
+            # max = df_array['morton'].max()
+            #
+            # ax[1].hist(search_mask['morton'], bins=range(min, max + 1), color='orange')
+            # ax[1].set_xlim(min,max)
+            # ax[1].title.set_text('Search area in latent space')
+            #
+            # fig.tight_layout()
+            # plt.show()
 
             # plotScatterAnnotationLatentSpace_df(df_array, m)
 
+    #print(results)
+    results.to_csv('lokalitaet_results.csv', index=False)
+    print("We are done!")
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
