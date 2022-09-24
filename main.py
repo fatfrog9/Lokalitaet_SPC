@@ -516,8 +516,9 @@ if __name__ == '__main__':
 
             # plotScatterAnnotationLatentSpace_df(df_array, m)
 
+
     #print(results)
-    results.to_csv('lokalitaet_results.csv', index=False)
+        results.to_csv('lokalitaet_results' + resolution + '.csv', index=False)
     print("We are done!")
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
