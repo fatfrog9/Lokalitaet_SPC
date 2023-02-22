@@ -445,11 +445,9 @@ if __name__ == '__main__':
         columns=['resolution', 'geofence_x_min', 'geofence_y_min', 'geofence_x_max', 'geofence_y_max',
                  'duration_binary', 'covered', 'precision'])
 
-<<<<<<< Updated upstream
-    for resolution in range(2,18):
-=======
+    #for resolution in range(2,18):
+
     for resolution in range(3,12):
->>>>>>> Stashed changes
         #resolution = 4  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
         rangeThreshold = 1.1
 
@@ -533,12 +531,7 @@ if __name__ == '__main__':
 
 
     #print(results)
-<<<<<<< Updated upstream
-        results.to_csv('lokalitaet_results_' + str(resolution) + '.csv', index=False)
-    print("We are done!")
-=======
         #results.to_csv('lokalitaet_results' + resolution + '.csv', index=False)
     #print("We are done!")
->>>>>>> Stashed changes
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
