@@ -5,7 +5,7 @@
 import math
 
 import numpy as np
-import pandas as pd
+#import pandas as pd
 import matplotlib.pyplot as plt
 import morton
 
@@ -98,7 +98,7 @@ def plotZline(morton_codes, m):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
-    resolution = 2  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)
+    resolution = 2 # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)
 
     np_array = generateArray(resolution)
 
