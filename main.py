@@ -51,9 +51,11 @@ def plotScatterAnnotationLatentSpace_df(df_array, curve, ax):
     # print(df_array)
     df_array.reset_index()
 
-    df_array.plot(x='x', y='y', marker="o", ax=ax, label="morton")
+    df_array.plot(x='x', y='y', marker="o", ax=ax, label="SFC")
     for idx, row in df_array.iterrows():
-        ax.annotate(row[curve], (row['x'] + 0.02, row['y'] + 0.02))
+        ax.annotate(row[curve], (row['x'] + 0.07, row['y'] + 0.02))
+
+    ax.set_ylabel('y', rotation=0)
 
 
 def calcMaximumDistanceBetweenPoints(np_array_morton):
@@ -320,7 +322,7 @@ def transfer_Geofence_to_Morton(geofence, m, resolution, resolution_search_space
     search_mask = pd.DataFrame(np_ar, columns = ['morton'])
     #print(len(search_mask))
 
-    # search_mask = df_array[(df_array.morton >= search_space[0]) & (df_array.morton <= search_space[1])]
+    #search_mask = df_array[(df_array.morton >= search_space[0]) & (df_array.morton <= search_space[1])]
 
     min = 0
     max = (2**resolution)-1
@@ -429,6 +431,8 @@ def identifyNonRelvantAreas(m, geofence, search_mask, min_value_x, min_value_y, 
     return search_mask
 
 
+
+
 ################################################################
 
 
@@ -441,7 +445,11 @@ if __name__ == '__main__':
         columns=['resolution', 'geofence_x_min', 'geofence_y_min', 'geofence_x_max', 'geofence_y_max',
                  'duration_binary', 'covered', 'precision'])
 
+<<<<<<< Updated upstream
     for resolution in range(2,18):
+=======
+    for resolution in range(3,12):
+>>>>>>> Stashed changes
         #resolution = 4  # anzahl der bits, die nötig sind um die werte im originalen array abzubilden (z.B. 4 für werte zwischen 0-15)# we need like 30 bits
         rangeThreshold = 1.1
 
@@ -455,19 +463,22 @@ if __name__ == '__main__':
 
         df_array, m, hilbert_curve = generateArray_df_morton(resolution=resolution, dimension=2)
 
-        #fig, ax = plt.subplots(2, gridspec_kw={'height_ratios':[5,1]})
-        #fig.canvas.set_window_title('Search Space with Morton Codes')
+        fig, ax = plt.subplots(2, gridspec_kw={'height_ratios':[5,1]})
+        fig.canvas.set_window_title('Search Space with Morton Codes')
 
-        #plotScatterAnnotationLatentSpace_df(df_array, 'morton', ax=ax[0])
+        plotScatterAnnotationLatentSpace_df(df_array, 'morton', ax=ax[0])
 
-        for i in tqdm(range(0,1000)):
+        for i in tqdm(range(0,1)):
 
             x_min = random.randint(0, 2**resolution-1)
             y_min = random.randint(0, 2**resolution-1)
             x_max = random.randint(x_min, 2**resolution-1)
             y_max = random.randint(y_min, 2**resolution-1)
 
-            geofence = [[x_min, y_min], [x_max, y_max]]
+
+            #geofence = [[x_min, y_min], [x_max, y_max]]
+            #geofence = [[2,1],[6,5]]
+            geofence = [[1, 4], [5, 6]]
 
             #print("Geofence: ", geofence)
 
@@ -491,34 +502,43 @@ if __name__ == '__main__':
             results = pd.concat([results, temp], ignore_index=True, sort=False)
 
 
-            # ax[0].title.set_text('Search area')
-            # ax[0].add_patch(
-            #     Rectangle((geofence[0][0] - 0.25, geofence[0][1] - 0.25), geofence[1][0] - geofence[0][0] + 0.5, geofence[1][1] - geofence[0][1] + 0.5, fill=False, color='red',
-            #               lw=2))
-            # # print(search_mask)
-            #
-            # filter = df_array["morton"].isin(search_mask['morton'])
-            # df_relevant_values = df_array[filter]
-            #
-            # df_relevant_values.sort_values(by='morton').reset_index().plot(x='x', y='y', marker="o", ax=ax[0],
-            #                                                         label="SearchSpace")
-            #
-            #
-            # min = df_array['morton'].min()
-            # max = df_array['morton'].max()
-            #
-            # ax[1].hist(search_mask['morton'], bins=range(min, max + 1), color='orange')
-            # ax[1].set_xlim(min,max)
-            # ax[1].title.set_text('Search area in latent space')
-            #
-            # fig.tight_layout()
-            # plt.show()
+            ax[0].title.set_text('data space')
+            ax[0].add_patch(
+                Rectangle((geofence[0][0] - 0.4, geofence[0][1] - 0.4), geofence[1][0] - geofence[0][0] + 0.8, geofence[1][1] - geofence[0][1] + 0.8, fill=False, color='red',
+                          lw=2))
+            # print(search_mask)
 
-            # plotScatterAnnotationLatentSpace_df(df_array, m)
+            filter = df_array["morton"].isin(search_mask['morton'])
+            df_relevant_values = df_array[filter]
+
+            df_relevant_values.sort_values(by='morton').reset_index().plot(x='x', y='y', marker="o", ax=ax[0],
+                                                                    label="area of interest")
+
+
+            min = df_array['morton'].min()
+            max = df_array['morton'].max()
+
+            ax[1].hist(search_mask['morton'], bins=range(min, max + 1), color='orange')
+            ax[1].set_xlim(min, max)
+            ax[1].title.set_text('area of interest in one-dimensional space')
+
+            fig.tight_layout()
+            plt.show()
+
+            fig.savefig('lokalitaet_dataspace.pdf')
+
+            plotScatterAnnotationLatentSpace_df(df_array, m, ax)
+
+
 
 
     #print(results)
+<<<<<<< Updated upstream
         results.to_csv('lokalitaet_results_' + str(resolution) + '.csv', index=False)
     print("We are done!")
+=======
+        #results.to_csv('lokalitaet_results' + resolution + '.csv', index=False)
+    #print("We are done!")
+>>>>>>> Stashed changes
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
